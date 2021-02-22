@@ -4,6 +4,7 @@
 The requirements can be installed from the requiremtns.txt file
 <br />python3 to_do_Api.py
 <br /> It will listen to localhost:5000. 
+<br />The test cases can be run by py.test in the directory containing test_todo.py
 
 ## Instructions to the UX team.
 You can send requests to the endpoints given in the postman documentation. The details of each requests and the expected responses are in the following link.
