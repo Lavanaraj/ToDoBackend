@@ -196,7 +196,7 @@ def get_all_archived_nodes():
             if(note["archive"]==True):
                 note["note_id"]=str(note["note_id"])
                 out_notes.append(note)
-        result = {'all_archived_nodes': out_notes}
+        result = {'all_archived_notes': out_notes}
     else:
         result = {'message': "Invalid JWT Token"}
     return jsonify(result)
@@ -212,7 +212,7 @@ def get_all_unarchived_nodes():
             if(note["archive"]==False):
                 note["note_id"]=str(note["note_id"])
                 out_notes.append(note)
-        result = {'all_unarchived_nodes': out_notes}
+        result = {'all_unarchived_notes': out_notes}
     else:
         result = {'message': "Invalid JWT Token"}
     return result
@@ -227,7 +227,7 @@ def get_all_nodes():
         for note in notes:
             note["note_id"] = str(note["note_id"])
             out_notes.append(note)
-        result = {'all_nodes': out_notes}
+        result = {'all_notes': out_notes}
     else:
         result = {'message': "Invalid JWT Token"}
     return jsonify(result)
