@@ -1,6 +1,5 @@
 import json
 from to_do_api import *
-import unittest
 
 def test_login():
     response = app.test_client().post(
