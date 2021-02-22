@@ -1,6 +1,5 @@
-import flask
 from bson import ObjectId
-from flask import Flask, jsonify, request, redirect
+from flask import Flask, jsonify
 from flask_pymongo import PyMongo
 from datetime import datetime, timedelta
 import jwt
@@ -97,7 +96,6 @@ def login():
     result = {'result': result_value}
     return jsonify(result)
 
-
 @app.route('/save_new_node', methods=['POST'])
 def save_new_node():
     jwttoken=request.headers['Authorization']
@@ -125,8 +123,6 @@ def save_new_node():
     else:
         result = {'message': "Invalid JWT Token"}
     return jsonify(result)
-
-
 
 @app.route('/update_note', methods=['POST'])
 def update_note():
@@ -220,7 +216,6 @@ def get_all_unarchived_nodes():
     else:
         result = {'message': "Invalid JWT Token"}
     return result
-
 
 @app.route('/get_all_nodes')
 def get_all_nodes():
