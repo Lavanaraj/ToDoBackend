@@ -1,7 +1,8 @@
 # ToDoBackend
 
 ## How to run API
-python3 to_do_Api.py
+The requirements can be installed from the requiremtns.txt file
+<br />python3 to_do_Api.py
 <br /> It will listen to localhost:5000. 
 
 ## Instructions to the UX team.
