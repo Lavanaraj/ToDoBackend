@@ -101,25 +101,27 @@ def save_new_node():
     jwttoken=request.headers['Authorization']
     if request.is_json:
         node_details = request.get_json()
-    user_details = db_users.find_one({'username':get_username(jwttoken)})
-    note=node_details['note']
-    if(user_details['jwttoken']==jwttoken):
-        try:
-            notes = {
-                'note': note,
-                'archive': False,
-                'note_id':ObjectId()
-            }
-            if(user_details['notes']!=None):
-                db_users.update_one({"_id": user_details["_id"]}, {"$addToSet": {"notes": notes}})
-        except:
-            notes = {
-                'note': note,
-                'archive': False,
-                'note_id': ObjectId()
-            }
-            db_users.update_one({"_id":user_details["_id"]},{"$set":{"notes":[notes]}})
-        result = {'message': "Note Saved Successfully!!!"}
+    username=get_username(jwttoken)
+    if(get_username(jwttoken)!="Session Expired"):
+        user_details = db_users.find_one({'username':username})
+        note=node_details['note']
+        if(user_details['jwttoken']==jwttoken):
+            try:
+                notes = {
+                    'note': note,
+                    'archive': False,
+                    'note_id':ObjectId()
+                }
+                if(user_details['notes']!=None):
+                    db_users.update_one({"_id": user_details["_id"]}, {"$addToSet": {"notes": notes}})
+            except:
+                notes = {
+                    'note': note,
+                    'archive': False,
+                    'note_id': ObjectId()
+                }
+                db_users.update_one({"_id":user_details["_id"]},{"$set":{"notes":[notes]}})
+            result = {'message': "Note Saved Successfully!!!"}
     else:
         result = {'message': "Invalid JWT Token"}
     return jsonify(result)
@@ -129,19 +131,21 @@ def update_note():
     jwttoken=request.headers['Authorization']
     if request.is_json:
         node_details = request.get_json()
-    user_details = db_users.find_one({'username':get_username(jwttoken)})
     updated_note=node_details['note']
     note_id=node_details['note_id']
-    if(user_details['jwttoken']==jwttoken):
-        notes=user_details['notes']
-        a=0
-        for note in notes:
-            if(ObjectId(note_id)==note['note_id']):
-                note['note']=updated_note
-                notes[a]=note
-            a+=1
-        db_users.update_one({"_id": user_details["_id"]}, {"$set": {"notes": notes}})
-        result = {'message': "Note Update Successfully!!!"}
+    username=get_username(jwttoken)
+    if(get_username(jwttoken)!="Session Expired"):
+        user_details = db_users.find_one({'username':username})
+        if(user_details['jwttoken']==jwttoken):
+            notes=user_details['notes']
+            a=0
+            for note in notes:
+                if(ObjectId(note_id)==note['note_id']):
+                    note['note']=updated_note
+                    notes[a]=note
+                a+=1
+            db_users.update_one({"_id": user_details["_id"]}, {"$set": {"notes": notes}})
+            result = {'message': "Note Update Successfully!!!"}
     else:
         result = {'message': "Invalid JWT Token"}
     return jsonify(result)
@@ -153,13 +157,16 @@ def delete_note():
         node_details = request.get_json()
     user_details = db_users.find_one({'username':get_username(jwttoken)})
     note_id=node_details['note_id']
-    if(user_details['jwttoken']==jwttoken):
-        notes=user_details['notes']
-        for note in notes:
-            if (ObjectId(note_id) == note['note_id']):
-                notes.remove(note)
-        db_users.update_one({"_id": user_details["_id"]}, {"$set": {"notes": notes}})
-        result = {'message': "Note Successfully Deleted!!!"}
+    if(get_username(jwttoken)!="Session Expired"):
+        if(user_details['jwttoken']==jwttoken):
+            notes=user_details['notes']
+            for note in notes:
+                if (ObjectId(note_id) == note['note_id']):
+                    notes.remove(note)
+            db_users.update_one({"_id": user_details["_id"]}, {"$set": {"notes": notes}})
+            result = {'message': "Note Successfully Deleted!!!"}
+        else:
+            result = {'message': "Invalid JWT Token"}
     else:
         result = {'message': "Invalid JWT Token"}
     return jsonify(result)
@@ -169,18 +176,21 @@ def change_archive():
     jwttoken=request.headers['Authorization']
     if request.is_json:
         node_details = request.get_json()
-    user_details = db_users.find_one({'username':get_username(jwttoken)})
     note_id=node_details['note_id']
-    if(user_details['jwttoken']==jwttoken):
-        notes=user_details['notes']
-        a=0
-        for note in notes:
-            if(ObjectId(note_id)==note['note_id']):
-                note['archive']= not(note['archive'])
-                notes[a]=note
-            a+=1
-        db_users.update_one({"_id": user_details["_id"]}, {"$set": {"notes": notes}})
-        result = {'message': "Note Archive Update Successfully!!!"}
+    username=get_username(jwttoken)
+    if(get_username(jwttoken)!="Session Expired"):
+        user_details = db_users.find_one({'username':username})
+        if(get_username(jwttoken)!="Session Expired"):
+            if(user_details['jwttoken']==jwttoken):
+                notes=user_details['notes']
+                a=0
+                for note in notes:
+                    if(ObjectId(note_id)==note['note_id']):
+                        note['archive']= not(note['archive'])
+                        notes[a]=note
+                    a+=1
+                db_users.update_one({"_id": user_details["_id"]}, {"$set": {"notes": notes}})
+                result = {'message': "Note Archive Update Successfully!!!"}
     else:
         result = {'message': "Invalid JWT Token"}
     return jsonify(result)
@@ -188,15 +198,17 @@ def change_archive():
 @app.route('/get_all_archived_nodes')
 def get_all_archived_nodes():
     jwttoken=request.headers['Authorization']
-    user_details = db_users.find_one({'username':get_username(jwttoken)})
-    if(user_details['jwttoken']==jwttoken):
-        notes=user_details["notes"]
-        out_notes=[]
-        for note in notes:
-            if(note["archive"]==True):
-                note["note_id"]=str(note["note_id"])
-                out_notes.append(note)
-        result = {'all_archived_notes': out_notes}
+    username=get_username(jwttoken)
+    if(get_username(jwttoken)!="Session Expired"):
+        user_details = db_users.find_one({'username':username})
+        if(user_details['jwttoken']==jwttoken):
+            notes=user_details["notes"]
+            out_notes=[]
+            for note in notes:
+                if(note["archive"]==True):
+                    note["note_id"]=str(note["note_id"])
+                    out_notes.append(note)
+            result = {'all_archived_notes': out_notes}
     else:
         result = {'message': "Invalid JWT Token"}
     return jsonify(result)
@@ -204,15 +216,17 @@ def get_all_archived_nodes():
 @app.route('/get_all_unarchived_nodes')
 def get_all_unarchived_nodes():
     jwttoken=request.headers['Authorization']
-    user_details = db_users.find_one({'username':get_username(jwttoken)})
-    if(user_details['jwttoken']==jwttoken):
-        notes=user_details["notes"]
-        out_notes=[]
-        for note in notes:
-            if(note["archive"]==False):
-                note["note_id"]=str(note["note_id"])
-                out_notes.append(note)
-        result = {'all_unarchived_notes': out_notes}
+    username=get_username(jwttoken)
+    if(get_username(jwttoken)!="Session Expired"):
+        user_details = db_users.find_one({'username':username})
+        if(user_details['jwttoken']==jwttoken):
+            notes=user_details["notes"]
+            out_notes=[]
+            for note in notes:
+                if(note["archive"]==False):
+                    note["note_id"]=str(note["note_id"])
+                    out_notes.append(note)
+            result = {'all_unarchived_notes': out_notes}
     else:
         result = {'message': "Invalid JWT Token"}
     return result
@@ -220,14 +234,16 @@ def get_all_unarchived_nodes():
 @app.route('/get_all_nodes')
 def get_all_nodes():
     jwttoken=request.headers['Authorization']
-    user_details = db_users.find_one({'username':get_username(jwttoken)})
-    if(user_details['jwttoken']==jwttoken):
-        notes = user_details["notes"]
-        out_notes = []
-        for note in notes:
-            note["note_id"] = str(note["note_id"])
-            out_notes.append(note)
-        result = {'all_notes': out_notes}
+    username=get_username(jwttoken)
+    if(get_username(jwttoken)!="Session Expired"):
+        user_details = db_users.find_one({'username':username})
+        if(user_details['jwttoken']==jwttoken):
+            notes = user_details["notes"]
+            out_notes = []
+            for note in notes:
+                note["note_id"] = str(note["note_id"])
+                out_notes.append(note)
+            result = {'all_notes': out_notes}
     else:
         result = {'message': "Invalid JWT Token"}
     return jsonify(result)
